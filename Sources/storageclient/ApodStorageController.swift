@@ -27,10 +27,18 @@ public class ApodStorageController {
     
     //MARK: - Methods - Public
     
-    public func saveItems(_ items: [ApodStorage]) {
+    public func saveItems(_ items: [ApodStorage]) throws {
         items.forEach { [weak self] (item: ApodStorage) in
-            try? self?.worker.save(item: item)
+            do {
+                try self?.worker.save(item: item)
+            } catch {
+                print(error.localizedDescription)
+            }
         }
+    }
+    
+    public func getAllItems() throws -> [ApodStorage]? {
+        try worker.getAll()
     }
     
     public func observeApods(startDate: Date?, endDate: Date?) {

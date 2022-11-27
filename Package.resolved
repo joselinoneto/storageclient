@@ -10,12 +10,21 @@
       }
     },
     {
+      "identity" : "swifterswift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/SwifterSwift/SwifterSwift.git",
+      "state" : {
+        "revision" : "933f27d8e7fa0bf8200a5d6235e0de383b801126",
+        "version" : "5.3.0"
+      }
+    },
+    {
       "identity" : "toolboxstorageclient",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/joselinoneto/ToolboxStorageClient",
       "state" : {
-        "revision" : "725f187548839b8b17236d6bb623ea53a16c7669",
-        "version" : "1.0.1"
+        "revision" : "9ec3d0288256cad21c2f57281d20e15f550c020d",
+        "version" : "1.0.2"
       }
     }
   ],
