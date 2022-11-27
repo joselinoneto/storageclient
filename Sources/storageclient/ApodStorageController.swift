@@ -19,6 +19,10 @@ public class ApodStorageController {
     @Published public var items: [ApodStorage]?
     //@Published public var currentMonth: TimelineMonth = TimelineMonth.currentMonth
     
+    // MARK: - Init
+    public init() {
+    }
+    
     //MARK: - Methods
     
     func saveItems(_ items: [ApodStorage]) {
