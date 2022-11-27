@@ -25,7 +25,7 @@ public class ApodStorageController {
     
     //MARK: - Methods
     
-    func saveItems(_ items: [ApodStorage]) {
+    public func saveItems(_ items: [ApodStorage]) {
         items.forEach { [weak self] (item: ApodStorage) in
             try? self?.worker.save(item: item)
         }
