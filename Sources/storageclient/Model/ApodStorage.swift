@@ -20,10 +20,6 @@ public class ApodStorage: LocalItem  {
     public var hdurl: String?
     public var copyright: String?
     
-    public static func createTable() {
-        
-    }
-    
     public init() {
         
     }
