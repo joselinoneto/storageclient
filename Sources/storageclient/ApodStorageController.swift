@@ -21,9 +21,10 @@ public class ApodStorageController {
     
     // MARK: - Init
     public init() {
+        createTable()
     }
     
-    //MARK: - Methods
+    //MARK: - Methods - Public
     
     public func saveItems(_ items: [ApodStorage]) {
         items.forEach { [weak self] (item: ApodStorage) in
@@ -50,5 +51,24 @@ public class ApodStorageController {
             } receiveValue: { [weak self] (savedItems: [ApodStorage]?) in
                 self?.items = savedItems
             }.store(in: &self.cancellables)
+    }
+    
+    // MARK: - Methods - Private
+    private func createTable() {
+        guard let dbQueue: DatabaseQueue = worker.dbQueue else { return }
+        try? dbQueue.write { db in
+            try db.create(table: "ApodStorage", options: .ifNotExists) { t in
+                t.column("id", .text).primaryKey()
+                t.column("date", .text)
+                t.column("postedDate", .text)
+                t.column("explanation", .text)
+                t.column("mediaType", .text)
+                t.column("thumbnailUrl", .text)
+                t.column("title", .text)
+                t.column("url", .text)
+                t.column("hdurl", .text)
+                t.column("copyright", .text)
+            }
+        }
     }
 }
