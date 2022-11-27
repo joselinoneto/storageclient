@@ -31,7 +31,7 @@ public class ApodStorageController {
         }
     }
     
-    func observeApods(startDate: Date?, endDate: Date?) {
+    public func observeApods(startDate: Date?, endDate: Date?) {
         guard let dbQueue: DatabaseQueue = worker.dbQueue else { return }
         let observation = ValueObservation.tracking { db in
             try ApodStorage
