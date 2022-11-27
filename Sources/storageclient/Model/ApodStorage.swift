@@ -23,4 +23,8 @@ public class ApodStorage: LocalItem  {
     public static func createTable() {
         
     }
+    
+    public init() {
+        
+    }
 }
