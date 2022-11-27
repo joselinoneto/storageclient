@@ -13,14 +13,15 @@ import GRDB
 public class ApodStorageController {
     // MARK: - Private
     private var cancellables: Set<AnyCancellable> = []
-    private let worker: LocalStorageClient<ApodStorage> = LocalStorageClient<ApodStorage>()
+    private let worker: LocalStorageClient<ApodStorage>
 
     // MARK: - Public
     @Published public var items: [ApodStorage]?
     //@Published public var currentMonth: TimelineMonth = TimelineMonth.currentMonth
     
     // MARK: - Init
-    public init() {
+    public init(pathToSqlite: String?) {
+        worker = LocalStorageClient<ApodStorage>(pathToSqlite: pathToSqlite)
         createTable()
     }
     
