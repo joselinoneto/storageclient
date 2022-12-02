@@ -13,15 +13,12 @@ final class storageclientTests: XCTestCase {
         item.title = "Mock Data"
         item.postedDate = Date()
         try storage.saveItems([item])
-        let items: [ApodStorage]? = try storage.getAllItems()
-
-        XCTAssertNotNil(items)
         
         let countEmittedExpected: Int = 3
         let apodPublisher = storage.$items.collect(countEmittedExpected).first()
         let counterArray = try awaitPublisher(apodPublisher)
         XCTAssertEqual(countEmittedExpected, counterArray.count)
-        
+
         let array: [ApodStorage]? = counterArray.last ?? []
         XCTAssertEqual(array?.first?.id, item.id)
     }
