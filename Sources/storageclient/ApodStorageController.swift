@@ -17,7 +17,6 @@ public class ApodStorageController {
 
     // MARK: - Public
     @Published public var items: [ApodStorage]?
-    //@Published public var currentMonth: TimelineMonth = TimelineMonth.currentMonth
     
     // MARK: - Init
     public init(pathToSqlite: String?) {
@@ -69,7 +68,7 @@ public class ApodStorageController {
             try db.create(table: "ApodStorage", options: .ifNotExists) { t in
                 t.column("id", .text).primaryKey()
                 t.column("date", .text)
-                t.column("postedDate", .text)
+                t.column("postedDate", .date)
                 t.column("explanation", .text)
                 t.column("mediaType", .text)
                 t.column("thumbnailUrl", .text)
