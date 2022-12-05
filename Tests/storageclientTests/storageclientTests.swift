@@ -22,6 +22,20 @@ final class storageclientTests: XCTestCase {
         let array: [ApodStorage]? = counterArray.last ?? []
         XCTAssertEqual(array?.first?.id, item.id)
     }
+    
+    func testCrud() throws {
+        let controller = ApodStorageController(pathToSqlite: nil)
+        let mock = ApodStorage()
+        mock.id = UUID()
+        mock.title = "MockTitle"
+        mock.postedDate = Date()
+        try controller.saveItems([mock])
+
+        let items = try controller.getAllItems()
+
+        XCTAssertNotNil(items)
+        XCTAssertEqual(items?.first?.id, mock.id)
+    }
 }
 
 extension XCTestCase {
