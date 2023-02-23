@@ -22,6 +22,15 @@ public class ApodStorageController {
     public init(pathToSqlite: String?) {
         worker = LocalStorageClient<ApodStorage>(pathToSqlite: pathToSqlite)
         createTable()
+        worker.valueObservation()
+
+        worker.$items.sink { (items: [ApodStorage]?) in
+            self.items = items
+        }.store(in: &cancellables)
+    }
+
+    deinit {
+        worker.cancelObservation()
     }
     
     //MARK: - Methods - Public
@@ -38,27 +47,6 @@ public class ApodStorageController {
     
     public func getAllItems() throws -> [ApodStorage]? {
         try worker.getAll()
-    }
-    
-    public func observeApods(startDate: Date?, endDate: Date?) {
-        guard let dbQueue: DatabaseQueue = worker.dbQueue else { return }
-        let observation = ValueObservation.tracking { db in
-            try ApodStorage
-                .filter(Column("postedDate") >= startDate && Column("postedDate") <= endDate)
-                .fetchAll(db)
-        }
-        observation
-            .publisher(in: dbQueue)
-            .sink { result in
-                switch result {
-                case .finished:
-                    break
-                case .failure(let error):
-                    print(error)
-                }
-            } receiveValue: { [weak self] (savedItems: [ApodStorage]?) in
-                self?.items = savedItems
-            }.store(in: &self.cancellables)
     }
     
     // MARK: - Methods - Private
