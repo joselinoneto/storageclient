@@ -7,13 +7,13 @@ import Combine
 final class storageclientTests: XCTestCase {
     func testDataBaseStorage() throws {
         let storage = ApodStorageController(pathToSqlite: nil)
-        storage.observeApods(startDate: Date().adding(.day, value: -1), endDate: Date().adding(.day, value: 1))
+
         let item = ApodStorage()
         item.id = UUID()
         item.title = "Mock Data"
         item.postedDate = Date()
         try storage.saveItems([item])
-        
+
         let countEmittedExpected: Int = 3
         let apodPublisher = storage.$items.collect(countEmittedExpected).first()
         let counterArray = try awaitPublisher(apodPublisher)
