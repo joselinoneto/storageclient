@@ -7,8 +7,11 @@
 
 import Foundation
 import ToolboxStorageClient
+import GRDB
 
 public class ApodStorage: LocalItem  {
+    public static let databaseDateDecodingStrategy: DatabaseDateDecodingStrategy = .timeIntervalSince1970
+
     public var id: UUID?
     public var date: String?
     public var postedDate: Date?
