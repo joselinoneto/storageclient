@@ -34,7 +34,31 @@ public class ApodStorageController {
     }
     
     //MARK: - Methods - Public
-    
+    public func saveItemsSql(_ items: [ApodStorage]) throws {
+        var sql: String = """
+        INSERT INTO APODSTORAGE (id, date, postedDate, explanation, mediaType, thumbnailUrl, title, url, hdurl, copyright) VALUES
+        """
+        items.forEach { (item: ApodStorage) in
+            sql.append(" ('\(item.id?.uuidString ?? "")',")
+            sql.append("'\(item.date ?? "")',")
+            sql.append("'\(item.postedDate?.databaseValue ?? Date().databaseValue)',")
+            sql.append("'\(item.explanation ?? "")',")
+            sql.append("'\(item.mediaType ?? "")',")
+            sql.append("'\(item.thumbnailUrl ?? "")',")
+            sql.append("'\(item.title ?? "")',")
+            sql.append("'\(item.url ?? "")',")
+            sql.append("'\(item.hdurl ?? "")',")
+            sql.append("'\(item.copyright ?? "")'),")
+        }
+        sql.removeLast()
+
+        do {
+            try worker.save(query: sql)
+        } catch {
+            print(error.localizedDescription)
+        }
+    }
+
     public func saveItems(_ items: [ApodStorage]) throws {
         items.forEach { [weak self] (item: ApodStorage) in
             do {
@@ -42,6 +66,14 @@ public class ApodStorageController {
             } catch {
                 print(error.localizedDescription)
             }
+        }
+    }
+
+    public func asyncSaveItem(_ item: ApodStorage) async throws {
+        do {
+            try await worker.asyncSave(item: item)
+        } catch {
+            print(error.localizedDescription)
         }
     }
     
