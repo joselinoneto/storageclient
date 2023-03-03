@@ -42,13 +42,13 @@ public class ApodStorageController {
             sql.append(" ('\(item.id?.uuidString ?? "")',")
             sql.append("'\(item.date ?? "")',")
             sql.append("'\(item.postedDate?.databaseValue ?? Date().databaseValue)',")
-            sql.append("'\(item.explanation?.replacingOccurrences(of: "'", with: "´") ?? "")',")
+            sql.append("'\(item.explanation?.noQuote ?? "")',")
             sql.append("'\(item.mediaType ?? "")',")
             sql.append("'\(item.thumbnailUrl ?? "")',")
-            sql.append("'\(item.title ?? "")',")
+            sql.append("'\(item.title?.noQuote ?? "")',")
             sql.append("'\(item.url ?? "")',")
             sql.append("'\(item.hdurl ?? "")',")
-            sql.append("'\(item.copyright ?? "")'),")
+            sql.append("'\(item.copyright?.noQuote ?? "")'),")
         }
         sql.removeLast()
 
