@@ -42,7 +42,7 @@ public class ApodStorageController {
             sql.append(" ('\(item.id?.uuidString ?? "")',")
             sql.append("'\(item.date ?? "")',")
             sql.append("'\(item.postedDate?.databaseValue ?? Date().databaseValue)',")
-            sql.append("'\(item.explanation ?? "")',")
+            sql.append("'\(item.explanation?.replacingOccurrences(of: "'", with: "´") ?? "")',")
             sql.append("'\(item.mediaType ?? "")',")
             sql.append("'\(item.thumbnailUrl ?? "")',")
             sql.append("'\(item.title ?? "")',")
@@ -56,6 +56,7 @@ public class ApodStorageController {
             try worker.save(query: sql)
         } catch {
             print(error.localizedDescription)
+            try? saveItems(items)
         }
     }
 
