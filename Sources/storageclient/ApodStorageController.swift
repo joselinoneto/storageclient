@@ -56,7 +56,6 @@ public class ApodStorageController {
             try worker.save(query: sql)
         } catch {
             print(error.localizedDescription)
-            try? saveItems(items)
         }
     }
 
