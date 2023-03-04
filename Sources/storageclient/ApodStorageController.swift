@@ -42,16 +42,16 @@ public class ApodStorageController {
         INSERT INTO APODSTORAGE (id, date, postedDate, explanation, mediaType, thumbnailUrl, title, url, hdurl, copyright) VALUES
         """
         items.forEach { (item: ApodStorage) in
-            sql.append(" ('\(item.id?.uuidString ?? "NULL")',")
-            sql.append("'\(item.date ?? "NULL")',")
-            sql.append("'\(item.postedDate?.databaseValue ?? "NULL")',")
-            sql.append("'\(item.explanation?.noQuote ?? "NULL")',")
-            sql.append("'\(item.mediaType ?? "NULL")',")
-            sql.append("'\(item.thumbnailUrl ?? "NULL")',")
-            sql.append("'\(item.title?.noQuote ?? "NULL")',")
-            sql.append("'\(item.url ?? "NULL")',")
-            sql.append("'\(item.hdurl ?? "NULL")',")
-            sql.append("'\(item.copyright?.noQuote ?? "NULL")'),")
+            sql.append(" ('\(item.id?.uuidString)',")
+            sql.append("'\(item.date)',")
+            sql.append("'\(item.postedDate?.databaseValue)',")
+            sql.append("'\(item.explanation?.noQuote)',")
+            sql.append("'\(item.mediaType)',")
+            sql.append("'\(item.thumbnailUrl)',")
+            sql.append("'\(item.title?.noQuote)',")
+            sql.append("'\(item.url)',")
+            sql.append("'\(item.hdurl)',")
+            sql.append("'\(item.copyright?.noQuote)'),")
         }
         sql.removeLast()
 
