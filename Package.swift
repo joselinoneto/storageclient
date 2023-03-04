@@ -16,6 +16,7 @@ let package = Package(
         // Dependencies declare other packages that this package depends on.
         // .package(url: /* package url */, from: "1.0.0"),
         .package(url: "https://github.com/joselinoneto/ToolboxStorageClient", from: "1.0.0"),
+        .package(url: "https://github.com/joselinoneto/tools", from: "1.0.0"),
         .package(url: "https://github.com/SwifterSwift/SwifterSwift.git", exact: "5.2.0"),
     ],
     targets: [
@@ -23,7 +24,7 @@ let package = Package(
         // Targets can depend on other targets in this package, and on products in packages this package depends on.
         .target(
             name: "storageclient",
-            dependencies: ["ToolboxStorageClient", "SwifterSwift"]),
+            dependencies: ["ToolboxStorageClient", "SwifterSwift", "tools"]),
         .testTarget(
             name: "storageclientTests",
             dependencies: ["storageclient"]),
