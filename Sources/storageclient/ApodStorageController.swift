@@ -38,28 +38,21 @@ public class ApodStorageController {
     
     //MARK: - Methods - Public
     public func saveItemsSql(_ items: [ApodStorage]) throws {
-        var sql: String = """
-        INSERT INTO APODSTORAGE (id, date, postedDate, explanation, mediaType, thumbnailUrl, title, url, hdurl, copyright) VALUES
-        """
-        items.forEach { (item: ApodStorage) in
-            sql.append(" ('\(item.id?.uuidString)',")
-            sql.append("'\(item.date)',")
-            sql.append("'\(item.postedDate?.databaseValue)',")
-            sql.append("'\(item.explanation?.noQuote)',")
-            sql.append("'\(item.mediaType)',")
-            sql.append("'\(item.thumbnailUrl)',")
-            sql.append("'\(item.title?.noQuote)',")
-            sql.append("'\(item.url)',")
-            sql.append("'\(item.hdurl)',")
-            sql.append("'\(item.copyright?.noQuote)'),")
-        }
-        sql.removeLast()
-
-        do {
-            try worker.save(query: sql)
-        } catch {
-            print(error.localizedDescription)
-        }
+        try worker.dbQueue?.write({ db in
+            for item in items {
+                try db.execute(sql: "INSERT INTO APODSTORAGE (id, date, postedDate, explanation, mediaType, thumbnailUrl, title, url, hdurl, copyright) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                               arguments: [item.id?.uuidString,
+                                           item.date,
+                                           item.postedDate?.databaseValue,
+                                           item.explanation?.noQuote,
+                                           item.mediaType,
+                                           item.thumbnailUrl,
+                                           item.title?.noQuote,
+                                           item.url,
+                                           item.hdurl,
+                                           item.copyright?.noQuote])
+            }
+        })
     }
 
     public func saveItems(_ items: [ApodStorage]) throws {
