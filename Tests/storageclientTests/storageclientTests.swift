@@ -67,7 +67,8 @@ final class storageclientTests: XCTestCase {
     func testCrud() throws {
         let controller = ApodStorageController(inMemory: true)
         let mock = ApodStorage()
-        mock.id = UUID()
+        let id = UUID()
+        mock.id = id
         mock.title = "MockTitle"
         mock.postedDate = Date()
         try controller.saveItems([mock])
@@ -76,6 +77,10 @@ final class storageclientTests: XCTestCase {
 
         XCTAssertNotNil(items)
         XCTAssertEqual(items?.first?.id, mock.id)
+
+        let item = try controller.getApod(id: id)
+        XCTAssertNotNil(item)
+        XCTAssertEqual(id, item?.id)
     }
 
     func testCrudAsync() async throws {
