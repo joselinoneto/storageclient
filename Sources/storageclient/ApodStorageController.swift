@@ -64,22 +64,18 @@ public class ApodStorageController {
 
     public func saveItems(_ items: [ApodStorage]) throws {
         items.forEach { [weak self] (item: ApodStorage) in
-            do {
-                try self?.worker.save(item: item)
-            } catch {
-                print(error.localizedDescription)
-            }
+            try? self?.worker.save(item: item)
         }
     }
 
     public func asyncSaveItem(_ item: ApodStorage) async throws {
-        do {
-            try await worker.asyncSave(item: item)
-        } catch {
-            print(error.localizedDescription)
-        }
+        try? await worker.asyncSave(item: item)
     }
-    
+
+    public func getApod(id: UUID) throws -> ApodStorage? {
+        try? worker.get(key: id)
+    }
+
     public func getAllItems() throws -> [ApodStorage]? {
         try worker.getAll()
     }
