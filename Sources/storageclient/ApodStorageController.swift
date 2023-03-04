@@ -72,6 +72,15 @@ public class ApodStorageController {
         try? await worker.asyncSave(item: item)
     }
 
+    public func searchApods(startMonth: Date?, endMonth: Date?) throws -> [ApodStorage]? {
+        try worker.dbQueue?.read({ db in
+            try ApodStorage
+                .filter("postedDate" >= startMonth?.databaseValue)
+                .filter("postedDate" <= endMonth?.databaseValue)
+                .fetchAll(db)
+        })
+    }
+    
     public func getApod(id: UUID) throws -> ApodStorage? {
         try? worker.get(key: id)
     }
