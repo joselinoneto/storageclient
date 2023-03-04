@@ -10,6 +10,15 @@
       }
     },
     {
+      "identity" : "keychainaccess",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/kishikawakatsumi/KeychainAccess",
+      "state" : {
+        "revision" : "84e546727d66f1adc5439debad16270d0fdd04e7",
+        "version" : "4.2.2"
+      }
+    },
+    {
       "identity" : "swifterswift",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/SwifterSwift/SwifterSwift.git",
@@ -25,6 +34,15 @@
       "state" : {
         "revision" : "8d6248ff790caeae43a0344f65ff2a9aa7418a86",
         "version" : "1.0.5"
+      }
+    },
+    {
+      "identity" : "tools",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/joselinoneto/tools",
+      "state" : {
+        "revision" : "d1b6ccc2948f8d474cd6ccd476380114021dc776",
+        "version" : "1.0.8"
       }
     }
   ],

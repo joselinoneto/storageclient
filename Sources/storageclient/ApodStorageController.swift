@@ -9,6 +9,7 @@ import Foundation
 import Combine
 import ToolboxStorageClient
 import GRDB
+import tools
 
 public class ApodStorageController {
     // MARK: - Private
@@ -19,14 +20,16 @@ public class ApodStorageController {
     @Published public var items: [ApodStorage]?
     
     // MARK: - Init
-    public init(pathToSqlite: String?) {
-        worker = LocalStorageClient<ApodStorage>(pathToSqlite: pathToSqlite)
+    public init(inMemory: Bool = false) {
+        let dbFile: String? = inMemory ? nil : "\(FileStorage.shared.folderUrl?.absoluteString ?? "")/apod.sqlite"
+        worker = LocalStorageClient<ApodStorage>(pathToSqlite: dbFile)
         createTable()
         worker.valueObservation()
 
-        worker.$items.sink { (items: [ApodStorage]?) in
-            self.items = items
-        }.store(in: &cancellables)
+        worker
+            .$items
+            .assign(to: \.items, on: self)
+            .store(in: &cancellables)
     }
 
     deinit {
@@ -39,16 +42,16 @@ public class ApodStorageController {
         INSERT INTO APODSTORAGE (id, date, postedDate, explanation, mediaType, thumbnailUrl, title, url, hdurl, copyright) VALUES
         """
         items.forEach { (item: ApodStorage) in
-            sql.append(" ('\(item.id?.uuidString ?? "")',")
-            sql.append("'\(item.date ?? "")',")
-            sql.append("'\(item.postedDate?.databaseValue ?? Date().databaseValue)',")
-            sql.append("'\(item.explanation?.noQuote ?? "")',")
-            sql.append("'\(item.mediaType ?? "")',")
-            sql.append("'\(item.thumbnailUrl ?? "")',")
-            sql.append("'\(item.title?.noQuote ?? "")',")
-            sql.append("'\(item.url ?? "")',")
-            sql.append("'\(item.hdurl ?? "")',")
-            sql.append("'\(item.copyright?.noQuote ?? "")'),")
+            sql.append(" ('\(item.id?.uuidString ?? "NULL")',")
+            sql.append("'\(item.date ?? "NULL")',")
+            sql.append("'\(item.postedDate?.databaseValue ?? "NULL")',")
+            sql.append("'\(item.explanation?.noQuote ?? "NULL")',")
+            sql.append("'\(item.mediaType ?? "NULL")',")
+            sql.append("'\(item.thumbnailUrl ?? "NULL")',")
+            sql.append("'\(item.title?.noQuote ?? "NULL")',")
+            sql.append("'\(item.url ?? "NULL")',")
+            sql.append("'\(item.hdurl ?? "NULL")',")
+            sql.append("'\(item.copyright?.noQuote ?? "NULL")'),")
         }
         sql.removeLast()
 
