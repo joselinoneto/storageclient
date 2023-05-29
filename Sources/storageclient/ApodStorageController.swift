@@ -38,8 +38,8 @@ public class ApodStorageController {
     
     //MARK: - Methods - Public
     public func saveItemsSql(_ items: [ApodStorage]) throws {
-        try worker.dbQueue?.write({ db in
-            for item in items {
+        for item in items {
+            try worker.dbQueue?.write({ db in
                 try db.execute(sql: "INSERT INTO APODSTORAGE (id, date, postedDate, explanation, mediaType, thumbnailUrl, title, url, hdurl, copyright) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                                arguments: [item.id?.uuidString,
                                            item.date,
@@ -51,8 +51,8 @@ public class ApodStorageController {
                                            item.url,
                                            item.hdurl,
                                            item.copyright?.noQuote])
-            }
-        })
+            })
+        }
     }
 
     public func saveItems(_ items: [ApodStorage]) throws {
