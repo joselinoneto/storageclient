@@ -15,6 +15,7 @@ public class ApodStorageController {
     // MARK: - Private
     private var cancellables: Set<AnyCancellable> = []
     private let worker: LocalStorageClient<ApodStorage>
+    private let insertSql: String = "INSERT INTO APODSTORAGE (id, date, postedDate, explanation, mediaType, thumbnailUrl, title, url, hdurl, copyright) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
 
     // MARK: - Public
     @Published public var items: [ApodStorage]?
@@ -37,22 +38,30 @@ public class ApodStorageController {
     }
     
     //MARK: - Methods - Public
-    public func saveItemsSql(_ items: [ApodStorage]) throws {
-        try worker.dbQueue?.write({ db in
-            for item in items {
-                try db.execute(sql: "INSERT INTO APODSTORAGE (id, date, postedDate, explanation, mediaType, thumbnailUrl, title, url, hdurl, copyright) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                               arguments: [item.id?.uuidString,
-                                           item.date,
-                                           item.postedDate?.databaseValue,
-                                           item.explanation?.noQuote,
-                                           item.mediaType,
-                                           item.thumbnailUrl,
-                                           item.title?.noQuote,
-                                           item.url,
-                                           item.hdurl,
-                                           item.copyright?.noQuote])
-            }
-        })
+    public func saveItemsSql(_ items: [ApodStorage]) async throws {
+        for item in items {
+            try await saveItemSql(item)
+        }
+    }
+
+    public func saveItemSql(_ item: ApodStorage) async throws {
+        if let id = item.id, try getApod(id: id) == nil {
+            try await saveSqlBatch(sql: insertSql,
+                         arguments: [item.id?.uuidString,
+                                     item.date,
+                                     item.postedDate?.databaseValue,
+                                     item.explanation?.noQuote,
+                                     item.mediaType,
+                                     item.thumbnailUrl,
+                                     item.title?.noQuote,
+                                     item.url,
+                                     item.hdurl,
+                                     item.copyright?.noQuote])
+        }
+    }
+
+    private func saveSqlBatch(sql: String, arguments: StatementArguments) async throws {
+        try? await worker.save(query: sql, arguments: arguments)
     }
 
     public func saveItems(_ items: [ApodStorage]) throws {
