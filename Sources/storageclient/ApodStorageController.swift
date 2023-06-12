@@ -15,7 +15,7 @@ public class ApodStorageController {
     // MARK: - Private
     private var cancellables: Set<AnyCancellable> = []
     private let worker: LocalStorageClient<ApodStorage>
-    private let insertSql: String = "INSERT INTO APODSTORAGE (id, date, postedDate, explanation, mediaType, thumbnailUrl, title, url, hdurl, copyright) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+    private let insertSql: String = "INSERT INTO APODSTORAGE (id, date, postedDate, explanation, mediaType, thumbnailUrl, title, url, hdurl, copyright, isfavorite) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
 
     // MARK: - Public
     @Published public var items: [ApodStorage]?
@@ -38,25 +38,24 @@ public class ApodStorageController {
     }
     
     //MARK: - Methods - Public
-    public func saveItemsSql(_ items: [ApodStorage]) async throws {
-        for item in items {
-            try await saveItemSql(item)
-        }
+    public func saveItems(_ items: [ApodStorage]) async throws {
+        try await worker.saveItems(items)
     }
 
     public func saveItemSql(_ item: ApodStorage) async throws {
         if let id = item.id, try getApod(id: id) == nil {
             try await saveSqlBatch(sql: insertSql,
-                         arguments: [item.id?.uuidString,
-                                     item.date,
-                                     item.postedDate?.databaseValue,
-                                     item.explanation?.noQuote,
-                                     item.mediaType,
-                                     item.thumbnailUrl,
-                                     item.title?.noQuote,
-                                     item.url,
-                                     item.hdurl,
-                                     item.copyright?.noQuote])
+                                   arguments: [item.id?.uuidString,
+                                               item.date,
+                                               item.postedDate?.databaseValue,
+                                               item.explanation?.noQuote,
+                                               item.mediaType,
+                                               item.thumbnailUrl,
+                                               item.title?.noQuote,
+                                               item.url,
+                                               item.hdurl,
+                                               item.copyright?.noQuote,
+                                               item.isFavorite])
         }
     }
 
@@ -81,6 +80,24 @@ public class ApodStorageController {
                 .fetchAll(db)
         })
     }
+
+    public func searchApods(_ text: String) throws -> [ApodStorage]? {
+        try worker.dbQueue?.read({ db in
+            try ApodStorage
+                .filter(Column("title").like("%\(text)%"))
+                .filter(Column("explanation").like("%\(text)%"))
+                .fetchAll(db)
+        })
+    }
+
+    public func searchFavorites() throws -> [ApodStorage]? {
+        try worker.dbQueue?.read({ db in
+            try ApodStorage
+                .order(Column("postedDate").desc)
+                .filter(Column("isfavorite") == true)
+                .fetchAll(db)
+        })
+    }
     
     public func getApod(id: UUID) throws -> ApodStorage? {
         try? worker.get(key: id)
@@ -97,7 +114,7 @@ public class ApodStorageController {
             try db.create(table: "ApodStorage", options: .ifNotExists) { t in
                 t.column("id", .text).primaryKey()
                 t.column("date", .text)
-                t.column("postedDate", .date)
+                t.column("postedDate", .datetime)
                 t.column("explanation", .text)
                 t.column("mediaType", .text)
                 t.column("thumbnailUrl", .text)
@@ -105,6 +122,7 @@ public class ApodStorageController {
                 t.column("url", .text)
                 t.column("hdurl", .text)
                 t.column("copyright", .text)
+                t.column("isfavorite", .boolean).notNull().defaults(to: false)
             }
         }
     }

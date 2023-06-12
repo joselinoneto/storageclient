@@ -56,7 +56,7 @@ final class storageclientTests: XCTestCase {
         item2.explanation = explanation
         item2.postedDate = Date()
 
-        try await storage.saveItemsSql([item, item1, item2])
+        try await storage.saveItems([item, item1, item2])
 
         let items = try storage.getAllItems()
 
