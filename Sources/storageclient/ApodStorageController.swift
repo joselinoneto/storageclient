@@ -6,35 +6,24 @@
 //
 
 import Foundation
-import Combine
 import ToolboxStorageClient
 import GRDB
 import tools
 
 public class ApodStorageController {
     // MARK: - Private
-    private var cancellables: Set<AnyCancellable> = []
     private let worker: LocalStorageClient<ApodStorage>
     private let insertSql: String = "INSERT INTO APODSTORAGE (id, date, postedDate, explanation, mediaType, thumbnailUrl, title, url, hdurl, copyright, isfavorite) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+    private var cancellable: AnyDatabaseCancellable?
 
     // MARK: - Public
     @Published public var items: [ApodStorage]?
-    
+
     // MARK: - Init
     public init(inMemory: Bool = false) {
         let dbFile: String? = inMemory ? nil : "\(FileStorage.shared.folderUrl?.absoluteString ?? "")/apod.sqlite"
         worker = LocalStorageClient<ApodStorage>(pathToSqlite: dbFile)
         createTable()
-        worker.valueObservation()
-
-        worker
-            .$items
-            .assign(to: \.items, on: self)
-            .store(in: &cancellables)
-    }
-
-    deinit {
-        worker.cancelObservation()
     }
     
     //MARK: - Methods - Public
@@ -43,9 +32,9 @@ public class ApodStorageController {
     }
 
     public func saveItemSql(_ item: ApodStorage) async throws {
-        if let id = item.id, try getApod(id: id) == nil {
+        if try getApod(id: item.id) == nil {
             try await saveSqlBatch(sql: insertSql,
-                                   arguments: [item.id?.uuidString,
+                                   arguments: [item.id.uuidString,
                                                item.date,
                                                item.postedDate?.databaseValue,
                                                item.explanation?.noQuote,
@@ -74,11 +63,8 @@ public class ApodStorageController {
     }
 
     public func searchApods(startMonth: String?, endMonth: String?) throws -> [ApodStorage]? {
-        try worker.dbQueue?.read({ db in
-            try ApodStorage
-                .filter(Column("date") >= startMonth && Column("date") <= endMonth)
-                .fetchAll(db)
-        })
+        let items = try worker.getFilter(Column("date") >= startMonth && Column("date") <= endMonth)
+        return items
     }
 
     public func searchApods(_ text: String) throws -> [ApodStorage]? {
@@ -91,11 +77,8 @@ public class ApodStorageController {
     }
 
     public func searchFavorites() throws -> [ApodStorage]? {
-        try worker.dbQueue?.read({ db in
-            try ApodStorage
-                .order(Column("postedDate").desc)
-                .filter(Column("isfavorite") == true)
-                .fetchAll(db)
+        try worker.getFilter(Column("isfavorite") == true)?.sorted(by: { lhs, rhs in
+            lhs.postedDate ?? Date() < rhs.postedDate ?? Date()
         })
     }
     

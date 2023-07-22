@@ -20,7 +20,7 @@ public class ApodStorage: LocalItem  {
 
     // public static let databaseDateDecodingStrategy: DatabaseDateDecodingStrategy = .timeIntervalSince1970
 
-    public var id: UUID?
+    public var id: UUID
     public var date: String?
     public var postedDate: Date?
     public var explanation: String?
@@ -33,5 +33,6 @@ public class ApodStorage: LocalItem  {
     public var isFavorite: Bool?
     
     public init() {
+        self.id = UUID()
     }
 }
