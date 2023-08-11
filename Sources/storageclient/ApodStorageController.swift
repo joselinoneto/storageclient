@@ -89,7 +89,11 @@ public class ApodStorageController {
     public func getAllItems() throws -> [ApodStorage]? {
         try worker.getAll()
     }
-    
+
+    public func deleteAllData() async throws {
+        try await worker.deleteAllData()
+    }
+
     // MARK: - Methods - Private
     private func createTable() {
         guard let dbQueue: DatabaseQueue = worker.dbQueue else { return }
