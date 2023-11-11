@@ -9,11 +9,12 @@ import Foundation
 import ToolboxStorageClient
 import GRDB
 import tools
+import SwifterSwift
 
 public class ApodStorageController {
     // MARK: - Private
     private let worker: LocalStorageClient<ApodStorage>
-    private let insertSql: String = "INSERT INTO APODSTORAGE (id, date, postedDate, explanation, mediaType, thumbnailUrl, title, url, hdurl, copyright, isfavorite) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+    private let insertSql: String = "INSERT INTO APODSTORAGE (date, postedDate, explanation, mediaType, thumbnailUrl, title, url, hdurl, copyright, isfavorite) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
     private var cancellable: AnyDatabaseCancellable?
 
     // MARK: - Public
@@ -34,8 +35,7 @@ public class ApodStorageController {
     public func saveItemSql(_ item: ApodStorage) async throws {
         if try getApod(id: item.id) == nil {
             try await saveSqlBatch(sql: insertSql,
-                                   arguments: [item.id.uuidString,
-                                               item.date,
+                                   arguments: [item.date,
                                                item.postedDate?.databaseValue,
                                                item.explanation?.noQuote,
                                                item.mediaType,
@@ -62,8 +62,37 @@ public class ApodStorageController {
         try? await worker.asyncSave(item: item)
     }
 
-    public func searchApods(startMonth: String?, endMonth: String?) throws -> [ApodStorage]? {
-        let items = try worker.getFilter(Column("date") >= startMonth && Column("date") <= endMonth)
+    public func searchApods(startMonth: String?) throws -> [ApodStorage]? {
+        let utcDateFormatter = DateFormatter()
+        utcDateFormatter.dateFormat = "yyyy-MM-dd"
+
+        // The default timeZone on DateFormatter is the device’s
+        // local time zone. Set timeZone to UTC to get UTC time.
+        guard let timeZone = TimeZone(abbreviation: "UTC") else { return nil }
+        utcDateFormatter.timeZone = timeZone
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = timeZone
+
+        let start: Date? = utcDateFormatter.date(from: startMonth ?? "")
+
+        let query = "SELECT id, date, postedDate, explanation, mediaType, thumbnailUrl, title, url, hdurl, copyright, isfavorite FROM ApodStorage WHERE strftime('%m', postedDate) IN (?) AND strftime('%Y', postedDate) IN (?)"
+//        let items = try worker.getQuery(query: query, arguments: [start?.month, start?.year])
+
+        guard let start = start else { return nil }
+        let items = try? worker.dbQueue?.read({ db in
+            var dateString: String
+            // to create 09 and not only one digit 9
+            if calendar.component(.month, from: start) < 10 {
+                dateString = String("0\(calendar.component(.month, from: start))")
+            } else {
+                dateString = String(calendar.component(.month, from: start))
+            }
+            let yearString: String = String(calendar.component(.year, from: start))
+            return try? ApodStorage.fetchAll(db, sql: query, arguments: [dateString, yearString])
+        })
+
+        //let items = try? worker.getAll()
+
         return items
     }
 
@@ -82,7 +111,7 @@ public class ApodStorageController {
         })
     }
     
-    public func getApod(id: UUID) throws -> ApodStorage? {
+    public func getApod(id: Int?) throws -> ApodStorage? {
         try? worker.get(key: id)
     }
 
@@ -99,7 +128,7 @@ public class ApodStorageController {
         guard let dbQueue: DatabaseQueue = worker.dbQueue else { return }
         try? dbQueue.write { db in
             try db.create(table: "ApodStorage", options: .ifNotExists) { t in
-                t.column("id", .text).primaryKey()
+                t.column("id", .integer).notNull().primaryKey(autoincrement: true)
                 t.column("date", .text)
                 t.column("postedDate", .datetime)
                 t.column("explanation", .text)
